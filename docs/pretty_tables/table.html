@@ -43,19 +43,19 @@ class Table(Artist):
     n_cells : int
     &#34;&#34;&#34;
 
-    def __init__(self):
+    def __init__(self, x, infer_row_column_labels = True):
         &#34;&#34;&#34;
         Parameters
         ----------
         x : array_like
             holds all of the table data and assumes row and column labels are included unless `infer_row_column_lablels` is `False`
+        ax : `matplotlib.Axes https://matplotlib.org/stable/api/axes_api.html `_ instance.
         infer_row_column_lablels : bool, default=True
             set to False if the class should NOT assume that the x[0][:] are the headers (column titles) and x[:][0] are the row labels
         n_rows : int
             the number of rows of the, ignored if x is not None
         n_columns : int
             the number of columns, ignored if x is not None
-        ax : matplotlib.Axes : https://matplotlib.org/stable/api/axes_api.html instance
         headers : array_like
             0 &lt; len(headers) &lt;= m, array of values to use as headers, if row_labels is not None and len(row_labels) == n and len(headers) == m and the values at headers[0] != row_labels[0], an error is raised to notify the user of ambiguity for the [0,0] value
         row_labels : array_like
@@ -157,6 +157,7 @@ class Cell():
 </dd>
 <dt id="pretty_tables.table.Table"><code class="flex name class">
 <span>class <span class="ident">Table</span></span>
+<span>(</span><span>x, infer_row_column_labels=True)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A table used to represent tabular information</p>
@@ -173,14 +174,13 @@ class Cell():
 <dl>
 <dt><strong><code>x</code></strong> :&ensp;<code>array_like</code></dt>
 <dd>holds all of the table data and assumes row and column labels are included unless <code>infer_row_column_lablels</code> is <code>False</code></dd>
+<dt>ax : <code>matplotlib.Axes https://matplotlib.org/stable/api/axes_api.html</code>_ instance.</dt>
 <dt><strong><code>infer_row_column_lablels</code></strong> :&ensp;<code>bool</code>, default=<code>True</code></dt>
 <dd>set to False if the class should NOT assume that the x[0][:] are the headers (column titles) and x[:][0] are the row labels</dd>
 <dt><strong><code>n_rows</code></strong> :&ensp;<code>int</code></dt>
 <dd>the number of rows of the, ignored if x is not None</dd>
 <dt><strong><code>n_columns</code></strong> :&ensp;<code>int</code></dt>
 <dd>the number of columns, ignored if x is not None</dd>
-<dt><strong><code>ax</code></strong> :&ensp;<code>matplotlib.Axes : &lt;https://matplotlib.org/stable/api/axes_api.html&gt; instance</code></dt>
-<dd>&nbsp;</dd>
 <dt><strong><code>headers</code></strong> :&ensp;<code>array_like</code></dt>
 <dd>0 &lt; len(headers) &lt;= m, array of values to use as headers, if row_labels is not None and len(row_labels) == n and len(headers) == m and the values at headers[0] != row_labels[0], an error is raised to notify the user of ambiguity for the [0,0] value</dd>
 <dt><strong><code>row_labels</code></strong> :&ensp;<code>array_like</code></dt>
@@ -212,19 +212,19 @@ class Cell():
     n_cells : int
     &#34;&#34;&#34;
 
-    def __init__(self):
+    def __init__(self, x, infer_row_column_labels = True):
         &#34;&#34;&#34;
         Parameters
         ----------
         x : array_like
             holds all of the table data and assumes row and column labels are included unless `infer_row_column_lablels` is `False`
+        ax : `matplotlib.Axes https://matplotlib.org/stable/api/axes_api.html `_ instance.
         infer_row_column_lablels : bool, default=True
             set to False if the class should NOT assume that the x[0][:] are the headers (column titles) and x[:][0] are the row labels
         n_rows : int
             the number of rows of the, ignored if x is not None
         n_columns : int
             the number of columns, ignored if x is not None
-        ax : matplotlib.Axes : https://matplotlib.org/stable/api/axes_api.html instance
         headers : array_like
             0 &lt; len(headers) &lt;= m, array of values to use as headers, if row_labels is not None and len(row_labels) == n and len(headers) == m and the values at headers[0] != row_labels[0], an error is raised to notify the user of ambiguity for the [0,0] value
         row_labels : array_like
