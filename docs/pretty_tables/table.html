@@ -31,7 +31,7 @@
 
 class Table(Artist):
     &#34;&#34;&#34;
-    A table used to represent tabular information
+    A table used to represent tabular information.
 
 
     Attributes
@@ -41,33 +41,35 @@ class Table(Artist):
     n : int
         The number of cells in a column, if no cells are merged. 
     n_cells : int
+        The whole number of cells presently in the table. If cells are merged, 
+        this will be less than m x n, otherwise it is m x n.
     &#34;&#34;&#34;
 
-    def __init__(self, x, infer_row_column_labels = True):
+    def __init__(self, data, ax, infer_row_column_labels = True, n_rows = None, n_columns = None, headers = None, row_labels = None):
         &#34;&#34;&#34;
         Parameters
         ----------
-        x : array_like
+        data : array_like
             holds all of the table data and assumes row and column labels are included unless `infer_row_column_lablels` is `False`
-        ax : `matplotlib.Axes https://matplotlib.org/stable/api/axes_api.html `_ instance.
+        ax : matplotlib Axes (https://matplotlib.org/stable/api/axes_api.html) instance
+            The axis which the table will be drawn to
         infer_row_column_lablels : bool, default=True
-            set to False if the class should NOT assume that the x[0][:] are the headers (column titles) and x[:][0] are the row labels
-        n_rows : int
-            the number of rows of the, ignored if x is not None
-        n_columns : int
-            the number of columns, ignored if x is not None
-        headers : array_like
-            0 &lt; len(headers) &lt;= m, array of values to use as headers, if row_labels is not None and len(row_labels) == n and len(headers) == m and the values at headers[0] != row_labels[0], an error is raised to notify the user of ambiguity for the [0,0] value
-        row_labels : array_like
-            0 &lt; len(headers) &lt;= n, array of values to use as row labels, if headers is not None and len(row_labels) == n and len(headers) == m and the values at row_labels[0] != headers[0], an error is raised to notify the user of ambiguity for the [0,0] value
-        style : string
-            one of the styles available from the matplotlib style sheets
-        header_color : color
-            the color of all of the non-hidden cells in the very top row of the table, ignored if style is not None
-        odd_row_color : color
-            the color to use for every odd row of x, ignored if style is not None
-        even_row_color : color
-            the color to use for every even row of x, ignored if style is not None
+            set to `False` if the class should NOT assume that the `data[0][:]` are the headers (column titles) and `data[:][0]` 
+            are the row labels
+        n_rows : int, default=None
+            the number of rows of the, ignored if `data` is not `None`
+        n_columns : int, default=None
+            the number of columns, ignored if `data` is not `None`
+        headers : array_like, default=None
+            `0 &lt; len(headers) &lt;= m`, array of values to use as headers, if `row_labels` is not `None` and `len(row_labels) == n` 
+            and `len(headers) == m` and the values at `headers[0] != row_labels[0]`, an error is raised to notify 
+            the user of ambiguity for the `[0,0]` value
+        row_labels : array_like, default=None
+            `0 &lt; len(headers) &lt;= n`, array of values to use as row labels, if `headers` is not `None` and `len(row_labels) == n`
+            and `len(headers) == m` and the values at `row_labels[0] != headers[0]`, an error is raised to notify 
+            the user of ambiguity for the `[0,0]` value
+        styler : TableStyler
+            The `pretty_tables.table.TableStyler` that will format the cells in the rows and columns
         &#34;&#34;&#34;
         pass
 
@@ -91,14 +93,35 @@ class Table(Artist):
         &#34;&#34;&#34;
         pass
 
-    def merge_cells(self):
+    def merge_cells(self, xy_start, xy_grow):
         &#34;&#34;&#34;
+        Merge cells together. Data of the cells that will be grown into will be lost.
+
+        Parameters
+        ----------
+        xy_start : tuple
+            two numbers, `0 &lt; x &lt; m-2` and `0 &lt; y &lt; n-2`, which represent which cell will be expanded by the dimensions in `xy_grow`
+        xy_grow : tuple
+            two numbers, `1 &lt; x &lt; (m - xy_start[0])` and `1 &lt; y &lt; (n - xy_start[1])` representing
+            how far to expand the cell in the `x` and `y` direction of the table
         &#34;&#34;&#34;
         pass
 
 
 class Cell():
     &#34;&#34;&#34;
+    A matplotlib Text, a collection of 4 Line2Ds, and a matplotlib Rectangle. The 4 edges are defined
+    using Line2Ds so that fine grain control of all edges in possible. The rectangle allows the background
+    color to be controlled and spans the full width and height of the cell.
+
+    Attributes
+    ----------
+    v_pad : int
+        The number of points to pad the top and bottom of the Text object. `v_pad / 2` will be above and below
+        the text
+    h_pad : int
+        The number of points to pad the left and right of the Text object. `h_pad / 2` will be above and below
+        the text
     &#34;&#34;&#34;
 
     def __init__(self):
@@ -112,6 +135,50 @@ class Cell():
         pass
 
     def __repr__(self):
+        &#34;&#34;&#34;
+        &#34;&#34;&#34;
+        pass
+
+class TableStyler():
+    &#34;&#34;&#34;
+    A class that styles a table. This class can be used to customize the look of a table,
+    but a default format will be inferred from the table data.
+
+    Notes
+    ----------
+    The rules below are a direct quote from [1]_.
+
+    1. Do not use vertical lines.
+    1. Do not use horizontal lines between data rows. (Horizontal lines as separator between the title row and the first data row or as frame for the entire table are fine.)
+    1. Text columns should be left aligned.
+    1. Number columns should be right aligned and should use the same number of decimal digits throughout.
+    1. Columns containing single characters are centered.
+    1. The header fields are aligned with their data, i.e., the heading for a text column will be left aligned and the heading for a number column will be right aligned.
+
+
+    .. [1] O. McNoleg, &#34;The integration of GIS, remote sensing,
+    expert systems and adaptive co-kriging for environmental habitat
+    modelling of the Highland Haggis using object-oriented, fuzzy-logic
+    and neural-network techniques,&#34; Computers &amp; Geosciences, vol. 22,
+    pp. 585-588, 1996.
+    &#34;&#34;&#34;
+
+    def __init__(self, style, header_color = None, odd_row_color = None, even_row_color = None):
+        &#34;&#34;&#34;
+        Parameters
+        ----------
+        style : string
+            one of the styles available from the matplotlib style sheets
+        header_color : color
+            the color of all of the non-hidden cells in the very top row of the table, ignored if style is not None
+        odd_row_color : color
+            the color to use for every odd row of x, ignored if style is not None
+        even_row_color : color
+            the color to use for every even row of x, ignored if style is not None
+        &#34;&#34;&#34;
+        pass
+
+    def infer_style(self, data):
         &#34;&#34;&#34;
         &#34;&#34;&#34;
         pass</code></pre>
@@ -130,13 +197,36 @@ class Cell():
 <span>class <span class="ident">Cell</span></span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>A matplotlib Text, a collection of 4 Line2Ds, and a matplotlib Rectangle. The 4 edges are defined
+using Line2Ds so that fine grain control of all edges in possible. The rectangle allows the background
+color to be controlled and spans the full width and height of the cell.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>v_pad</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of points to pad the top and bottom of the Text object. <code>v_pad / 2</code> will be above and below
+the text</dd>
+<dt><strong><code>h_pad</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of points to pad the left and right of the Text object. <code>h_pad / 2</code> will be above and below
+the text</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Cell():
     &#34;&#34;&#34;
+    A matplotlib Text, a collection of 4 Line2Ds, and a matplotlib Rectangle. The 4 edges are defined
+    using Line2Ds so that fine grain control of all edges in possible. The rectangle allows the background
+    color to be controlled and spans the full width and height of the cell.
+
+    Attributes
+    ----------
+    v_pad : int
+        The number of points to pad the top and bottom of the Text object. `v_pad / 2` will be above and below
+        the text
+    h_pad : int
+        The number of points to pad the left and right of the Text object. `h_pad / 2` will be above and below
+        the text
     &#34;&#34;&#34;
 
     def __init__(self):
@@ -157,10 +247,10 @@ class Cell():
 </dd>
 <dt id="pretty_tables.table.Table"><code class="flex name class">
 <span>class <span class="ident">Table</span></span>
-<span>(</span><span>x, infer_row_column_labels=True)</span>
+<span>(</span><span>data, ax, infer_row_column_labels=True, n_rows=None, n_columns=None, headers=None, row_labels=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A table used to represent tabular information</p>
+<div class="desc"><p>A table used to represent tabular information.</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
 <dt><strong><code>m</code></strong> :&ensp;<code>int</code></dt>
@@ -168,31 +258,32 @@ class Cell():
 <dt><strong><code>n</code></strong> :&ensp;<code>int</code></dt>
 <dd>The number of cells in a column, if no cells are merged.</dd>
 <dt><strong><code>n_cells</code></strong> :&ensp;<code>int</code></dt>
-<dd>&nbsp;</dd>
+<dd>The whole number of cells presently in the table. If cells are merged,
+this will be less than m x n, otherwise it is m x n.</dd>
 </dl>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>x</code></strong> :&ensp;<code>array_like</code></dt>
+<dt><strong><code>data</code></strong> :&ensp;<code>array_like</code></dt>
 <dd>holds all of the table data and assumes row and column labels are included unless <code>infer_row_column_lablels</code> is <code>False</code></dd>
-<dt>ax : <code>matplotlib.Axes https://matplotlib.org/stable/api/axes_api.html</code>_ instance.</dt>
+<dt><strong><code>ax</code></strong> :&ensp;<code>matplotlib Axes (&lt;https://matplotlib.org/stable/api/axes_api.html&gt;) instance</code></dt>
+<dd>The axis which the table will be drawn to</dd>
 <dt><strong><code>infer_row_column_lablels</code></strong> :&ensp;<code>bool</code>, default=<code>True</code></dt>
-<dd>set to False if the class should NOT assume that the x[0][:] are the headers (column titles) and x[:][0] are the row labels</dd>
-<dt><strong><code>n_rows</code></strong> :&ensp;<code>int</code></dt>
-<dd>the number of rows of the, ignored if x is not None</dd>
-<dt><strong><code>n_columns</code></strong> :&ensp;<code>int</code></dt>
-<dd>the number of columns, ignored if x is not None</dd>
-<dt><strong><code>headers</code></strong> :&ensp;<code>array_like</code></dt>
-<dd>0 &lt; len(headers) &lt;= m, array of values to use as headers, if row_labels is not None and len(row_labels) == n and len(headers) == m and the values at headers[0] != row_labels[0], an error is raised to notify the user of ambiguity for the [0,0] value</dd>
-<dt><strong><code>row_labels</code></strong> :&ensp;<code>array_like</code></dt>
-<dd>0 &lt; len(headers) &lt;= n, array of values to use as row labels, if headers is not None and len(row_labels) == n and len(headers) == m and the values at row_labels[0] != headers[0], an error is raised to notify the user of ambiguity for the [0,0] value</dd>
-<dt><strong><code>style</code></strong> :&ensp;<code>string</code></dt>
-<dd>one of the styles available from the matplotlib style sheets</dd>
-<dt><strong><code>header_color</code></strong> :&ensp;<code>color</code></dt>
-<dd>the color of all of the non-hidden cells in the very top row of the table, ignored if style is not None</dd>
-<dt><strong><code>odd_row_color</code></strong> :&ensp;<code>color</code></dt>
-<dd>the color to use for every odd row of x, ignored if style is not None</dd>
-<dt><strong><code>even_row_color</code></strong> :&ensp;<code>color</code></dt>
-<dd>the color to use for every even row of x, ignored if style is not None</dd>
+<dd>set to <code>False</code> if the class should NOT assume that the <code>data[0][:]</code> are the headers (column titles) and <code>data[:][0]</code>
+are the row labels</dd>
+<dt><strong><code>n_rows</code></strong> :&ensp;<code>int</code>, default=<code>None</code></dt>
+<dd>the number of rows of the, ignored if <code>data</code> is not <code>None</code></dd>
+<dt><strong><code>n_columns</code></strong> :&ensp;<code>int</code>, default=<code>None</code></dt>
+<dd>the number of columns, ignored if <code>data</code> is not <code>None</code></dd>
+<dt><strong><code>headers</code></strong> :&ensp;<code>array_like</code>, default=<code>None</code></dt>
+<dd><code>0 &lt; len(headers) &lt;= m</code>, array of values to use as headers, if <code>row_labels</code> is not <code>None</code> and <code>len(row_labels) == n</code>
+and <code>len(headers) == m</code> and the values at <code>headers[0] != row_labels[0]</code>, an error is raised to notify
+the user of ambiguity for the <code>[0,0]</code> value</dd>
+<dt><strong><code>row_labels</code></strong> :&ensp;<code>array_like</code>, default=<code>None</code></dt>
+<dd><code>0 &lt; len(headers) &lt;= n</code>, array of values to use as row labels, if <code>headers</code> is not <code>None</code> and <code>len(row_labels) == n</code>
+and <code>len(headers) == m</code> and the values at <code>row_labels[0] != headers[0]</code>, an error is raised to notify
+the user of ambiguity for the <code>[0,0]</code> value</dd>
+<dt><strong><code>styler</code></strong> :&ensp;<code><a title="pretty_tables.table.TableStyler" href="#pretty_tables.table.TableStyler">TableStyler</a></code></dt>
+<dd>The <code><a title="pretty_tables.table.TableStyler" href="#pretty_tables.table.TableStyler">TableStyler</a></code> that will format the cells in the rows and columns</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -200,7 +291,7 @@ class Cell():
 </summary>
 <pre><code class="python">class Table(Artist):
     &#34;&#34;&#34;
-    A table used to represent tabular information
+    A table used to represent tabular information.
 
 
     Attributes
@@ -210,33 +301,35 @@ class Cell():
     n : int
         The number of cells in a column, if no cells are merged. 
     n_cells : int
+        The whole number of cells presently in the table. If cells are merged, 
+        this will be less than m x n, otherwise it is m x n.
     &#34;&#34;&#34;
 
-    def __init__(self, x, infer_row_column_labels = True):
+    def __init__(self, data, ax, infer_row_column_labels = True, n_rows = None, n_columns = None, headers = None, row_labels = None):
         &#34;&#34;&#34;
         Parameters
         ----------
-        x : array_like
+        data : array_like
             holds all of the table data and assumes row and column labels are included unless `infer_row_column_lablels` is `False`
-        ax : `matplotlib.Axes https://matplotlib.org/stable/api/axes_api.html `_ instance.
+        ax : matplotlib Axes (https://matplotlib.org/stable/api/axes_api.html) instance
+            The axis which the table will be drawn to
         infer_row_column_lablels : bool, default=True
-            set to False if the class should NOT assume that the x[0][:] are the headers (column titles) and x[:][0] are the row labels
-        n_rows : int
-            the number of rows of the, ignored if x is not None
-        n_columns : int
-            the number of columns, ignored if x is not None
-        headers : array_like
-            0 &lt; len(headers) &lt;= m, array of values to use as headers, if row_labels is not None and len(row_labels) == n and len(headers) == m and the values at headers[0] != row_labels[0], an error is raised to notify the user of ambiguity for the [0,0] value
-        row_labels : array_like
-            0 &lt; len(headers) &lt;= n, array of values to use as row labels, if headers is not None and len(row_labels) == n and len(headers) == m and the values at row_labels[0] != headers[0], an error is raised to notify the user of ambiguity for the [0,0] value
-        style : string
-            one of the styles available from the matplotlib style sheets
-        header_color : color
-            the color of all of the non-hidden cells in the very top row of the table, ignored if style is not None
-        odd_row_color : color
-            the color to use for every odd row of x, ignored if style is not None
-        even_row_color : color
-            the color to use for every even row of x, ignored if style is not None
+            set to `False` if the class should NOT assume that the `data[0][:]` are the headers (column titles) and `data[:][0]` 
+            are the row labels
+        n_rows : int, default=None
+            the number of rows of the, ignored if `data` is not `None`
+        n_columns : int, default=None
+            the number of columns, ignored if `data` is not `None`
+        headers : array_like, default=None
+            `0 &lt; len(headers) &lt;= m`, array of values to use as headers, if `row_labels` is not `None` and `len(row_labels) == n` 
+            and `len(headers) == m` and the values at `headers[0] != row_labels[0]`, an error is raised to notify 
+            the user of ambiguity for the `[0,0]` value
+        row_labels : array_like, default=None
+            `0 &lt; len(headers) &lt;= n`, array of values to use as row labels, if `headers` is not `None` and `len(row_labels) == n`
+            and `len(headers) == m` and the values at `row_labels[0] != headers[0]`, an error is raised to notify 
+            the user of ambiguity for the `[0,0]` value
+        styler : TableStyler
+            The `pretty_tables.table.TableStyler` that will format the cells in the rows and columns
         &#34;&#34;&#34;
         pass
 
@@ -260,8 +353,17 @@ class Cell():
         &#34;&#34;&#34;
         pass
 
-    def merge_cells(self):
+    def merge_cells(self, xy_start, xy_grow):
         &#34;&#34;&#34;
+        Merge cells together. Data of the cells that will be grown into will be lost.
+
+        Parameters
+        ----------
+        xy_start : tuple
+            two numbers, `0 &lt; x &lt; m-2` and `0 &lt; y &lt; n-2`, which represent which cell will be expanded by the dimensions in `xy_grow`
+        xy_grow : tuple
+            two numbers, `1 &lt; x &lt; (m - xy_start[0])` and `1 &lt; y &lt; (n - xy_start[1])` representing
+            how far to expand the cell in the `x` and `y` direction of the table
         &#34;&#34;&#34;
         pass</code></pre>
 </details>
@@ -272,7 +374,124 @@ class Cell():
 <h3>Methods</h3>
 <dl>
 <dt id="pretty_tables.table.Table.merge_cells"><code class="name flex">
-<span>def <span class="ident">merge_cells</span></span>(<span>self)</span>
+<span>def <span class="ident">merge_cells</span></span>(<span>self, xy_start, xy_grow)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Merge cells together. Data of the cells that will be grown into will be lost.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>xy_start</code></strong> :&ensp;<code>tuple</code></dt>
+<dd>two numbers, <code>0 &lt; x &lt; m-2</code> and <code>0 &lt; y &lt; n-2</code>, which represent which cell will be expanded by the dimensions in <code>xy_grow</code></dd>
+<dt><strong><code>xy_grow</code></strong> :&ensp;<code>tuple</code></dt>
+<dd>two numbers, <code>1 &lt; x &lt; (m - xy_start[0])</code> and <code>1 &lt; y &lt; (n - xy_start[1])</code> representing
+how far to expand the cell in the <code>x</code> and <code>y</code> direction of the table</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def merge_cells(self, xy_start, xy_grow):
+    &#34;&#34;&#34;
+    Merge cells together. Data of the cells that will be grown into will be lost.
+
+    Parameters
+    ----------
+    xy_start : tuple
+        two numbers, `0 &lt; x &lt; m-2` and `0 &lt; y &lt; n-2`, which represent which cell will be expanded by the dimensions in `xy_grow`
+    xy_grow : tuple
+        two numbers, `1 &lt; x &lt; (m - xy_start[0])` and `1 &lt; y &lt; (n - xy_start[1])` representing
+        how far to expand the cell in the `x` and `y` direction of the table
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pretty_tables.table.TableStyler"><code class="flex name class">
+<span>class <span class="ident">TableStyler</span></span>
+<span>(</span><span>style, header_color=None, odd_row_color=None, even_row_color=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A class that styles a table. This class can be used to customize the look of a table,
+but a default format will be inferred from the table data.</p>
+<h2 id="notes">Notes</h2>
+<p>The rules below are a direct quote from [1]_.</p>
+<ol>
+<li>Do not use vertical lines.</li>
+<li>Do not use horizontal lines between data rows. (Horizontal lines as separator between the title row and the first data row or as frame for the entire table are fine.)</li>
+<li>Text columns should be left aligned.</li>
+<li>Number columns should be right aligned and should use the same number of decimal digits throughout.</li>
+<li>Columns containing single characters are centered.</li>
+<li>The header fields are aligned with their data, i.e., the heading for a text column will be left aligned and the heading for a number column will be right aligned.</li>
+</ol>
+<p>.. [1] O. McNoleg, "The integration of GIS, remote sensing,
+expert systems and adaptive co-kriging for environmental habitat
+modelling of the Highland Haggis using object-oriented, fuzzy-logic
+and neural-network techniques," Computers &amp; Geosciences, vol. 22,
+pp. 585-588, 1996.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>style</code></strong> :&ensp;<code>string</code></dt>
+<dd>one of the styles available from the matplotlib style sheets</dd>
+<dt><strong><code>header_color</code></strong> :&ensp;<code>color</code></dt>
+<dd>the color of all of the non-hidden cells in the very top row of the table, ignored if style is not None</dd>
+<dt><strong><code>odd_row_color</code></strong> :&ensp;<code>color</code></dt>
+<dd>the color to use for every odd row of x, ignored if style is not None</dd>
+<dt><strong><code>even_row_color</code></strong> :&ensp;<code>color</code></dt>
+<dd>the color to use for every even row of x, ignored if style is not None</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TableStyler():
+    &#34;&#34;&#34;
+    A class that styles a table. This class can be used to customize the look of a table,
+    but a default format will be inferred from the table data.
+
+    Notes
+    ----------
+    The rules below are a direct quote from [1]_.
+
+    1. Do not use vertical lines.
+    1. Do not use horizontal lines between data rows. (Horizontal lines as separator between the title row and the first data row or as frame for the entire table are fine.)
+    1. Text columns should be left aligned.
+    1. Number columns should be right aligned and should use the same number of decimal digits throughout.
+    1. Columns containing single characters are centered.
+    1. The header fields are aligned with their data, i.e., the heading for a text column will be left aligned and the heading for a number column will be right aligned.
+
+
+    .. [1] O. McNoleg, &#34;The integration of GIS, remote sensing,
+    expert systems and adaptive co-kriging for environmental habitat
+    modelling of the Highland Haggis using object-oriented, fuzzy-logic
+    and neural-network techniques,&#34; Computers &amp; Geosciences, vol. 22,
+    pp. 585-588, 1996.
+    &#34;&#34;&#34;
+
+    def __init__(self, style, header_color = None, odd_row_color = None, even_row_color = None):
+        &#34;&#34;&#34;
+        Parameters
+        ----------
+        style : string
+            one of the styles available from the matplotlib style sheets
+        header_color : color
+            the color of all of the non-hidden cells in the very top row of the table, ignored if style is not None
+        odd_row_color : color
+            the color to use for every odd row of x, ignored if style is not None
+        even_row_color : color
+            the color to use for every even row of x, ignored if style is not None
+        &#34;&#34;&#34;
+        pass
+
+    def infer_style(self, data):
+        &#34;&#34;&#34;
+        &#34;&#34;&#34;
+        pass</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="pretty_tables.table.TableStyler.infer_style"><code class="name flex">
+<span>def <span class="ident">infer_style</span></span>(<span>self, data)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -280,7 +499,7 @@ class Cell():
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def merge_cells(self):
+<pre><code class="python">def infer_style(self, data):
     &#34;&#34;&#34;
     &#34;&#34;&#34;
     pass</code></pre>
@@ -311,6 +530,12 @@ class Cell():
 <h4><code><a title="pretty_tables.table.Table" href="#pretty_tables.table.Table">Table</a></code></h4>
 <ul class="">
 <li><code><a title="pretty_tables.table.Table.merge_cells" href="#pretty_tables.table.Table.merge_cells">merge_cells</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pretty_tables.table.TableStyler" href="#pretty_tables.table.TableStyler">TableStyler</a></code></h4>
+<ul class="">
+<li><code><a title="pretty_tables.table.TableStyler.infer_style" href="#pretty_tables.table.TableStyler.infer_style">infer_style</a></code></li>
 </ul>
 </li>
 </ul>
