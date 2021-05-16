@@ -13,3 +13,5 @@ To generate the documentation for deployment:
 ```
 pdoc --html -o docs --force pretty_tables
 ```
+
+The docs directory is setup
