@@ -1,6 +1,6 @@
 # Pretty Tables
 
-![alt](https://k20shores.github.io/images/table.png)
+![alt](assets/table.png)
 
 # References
 1. Wilke CO. Fundamentals of Data Visualization [Internet]. [cited 2021 May 3]. Available from: https://clauswilke.com/dataviz/figure-titles-captions.html#tables
